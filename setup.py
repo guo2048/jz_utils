@@ -4,7 +4,7 @@ setup(
     name="jz_utils",
     version="0.1.0",
     packages=find_packages(),
-    install_requires=["pydantic", "boto3", "pycryptodome", "pika", "apscheduler"],
+    install_requires=["pydantic", "boto3", "pycryptodome", "pika", "apscheduler", "python-dotenv"],
     author="yy",
     description="A collection of utility modules.",
 )

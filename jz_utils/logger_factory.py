@@ -2,7 +2,12 @@ import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 
+from dotenv import load_dotenv
+
 from jz_utils.env import running_prod
+
+# 自动加载 .env 文件中的环境变量
+load_dotenv()
 
 _initialized = False
 
