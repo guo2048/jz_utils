@@ -13,14 +13,12 @@ def _setup_logger(project_name: str = None):
     if _initialized:
         return
 
-    # 如果未指定项目名称，则尝试从环境变量读取，或使用当前工作目录名
+    # 如果未指定项目名称，则尝试从环境变量读取
     if not project_name:
         project_name = os.environ.get("PROJECT_NAME")
+
     if not project_name:
-        try:
-            project_name = os.path.basename(os.getcwd())
-        except Exception:
-            project_name = "jz_project"
+        raise ValueError("project_name must be provided either as an argument or via PROJECT_NAME environment variable")
 
     _logger = logging.getLogger()
 
