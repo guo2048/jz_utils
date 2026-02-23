@@ -1,10 +1,9 @@
+import datetime
+import os
+import threading
 import urllib
 import urllib.request
-import datetime
-import threading
-import os
 
-from jz_utils.configs import GlobalConfigs
 from jz_utils.singleton import singleton
 
 
@@ -40,9 +39,16 @@ class TelegramBotPeriodically:
 @singleton
 class SimpleTelegramBot:
     def __init__(self, bot_id=None, chat_id=None, mark=None):
-        self.bot_id = bot_id if bot_id else GlobalConfigs.get_tele_config().bot_id
-        self.chat_id = chat_id if chat_id else GlobalConfigs.get_tele_config().chat_id
-        self.mark = os.environ.get("RUN_ENV", mark)
+        self.bot_id = bot_id or os.environ.get("TELE_BOT_ID")
+        self.chat_id = chat_id or os.environ.get("TELE_CHAT_ID")
+
+        if not self.bot_id or not self.chat_id:
+            # 为了向后兼容，如果还在特定项目里，用户可能希望报错更人性化
+            raise ValueError(
+                "bot_id and chat_id must be provided or set via environment variables (TELE_BOT_ID, TELE_CHAT_ID)"
+            )
+
+        self.mark = mark or os.environ.get("RUN_ENV")
         self.url_prefix = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=" % (self.bot_id, self.chat_id)
 
     def send(self, msg):

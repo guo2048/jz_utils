@@ -7,14 +7,12 @@ import pika
 from pika.exceptions import AMQPHeartbeatTimeout
 
 from jz_utils import logger_factory
-from jz_utils.configs import GlobalConfigs
 from jz_utils.telegram_msg_bot import SimpleTelegramBot
 
 logger = logger_factory.get_logger(__name__)
 
 
-def create_channel(routing_key, callback):
-    amqp_url = GlobalConfigs.get_mq_url()
+def create_channel(amqp_url, routing_key, callback):
     logger.info("receving mq using config: %s", amqp_url)
 
     # 解析 URL 连接 RabbitMQ
@@ -45,10 +43,10 @@ def close_conn(channel, routing_key):
     return _close
 
 
-def receive(routing_key, callback):
+def receive(amqp_url, routing_key, callback):
     while True:
         try:
-            channel = create_channel(routing_key, callback)
+            channel = create_channel(amqp_url, routing_key, callback)
             SimpleTelegramBot().send(f"开始消费MQ {routing_key}")
             channel.start_consuming()
         except AMQPHeartbeatTimeout as e:
@@ -61,14 +59,15 @@ def receive(routing_key, callback):
 
 
 class MQConsumer:
-    def __init__(self, topic: str):
+    def __init__(self, amqp_url: str, topic: str):
+        self.amqp_url = amqp_url
         self.topic = topic
         self.queue = Queue(1000)
         self.start_updater()
         self.start_listener()
 
     def start_listener(self):
-        self.listener_thread = threading.Thread(target=receive, args=(self.topic, self.handle_raw_msg))
+        self.listener_thread = threading.Thread(target=receive, args=(self.amqp_url, self.topic, self.handle_raw_msg))
         self.listener_thread.start()
 
     def start_updater(self):
