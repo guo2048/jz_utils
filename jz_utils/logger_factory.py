@@ -7,18 +7,14 @@ from jz_utils.env import running_prod
 _initialized = False
 
 
-def _setup_logger(project_name: str = None):
+def _setup_logger(project_name: str):
     """配置全局根日志记录器"""
     global _initialized
     if _initialized:
         return
 
-    # 如果未指定项目名称，则尝试从环境变量读取
     if not project_name:
-        project_name = os.environ.get("PROJECT_NAME")
-
-    if not project_name:
-        raise ValueError("project_name must be provided either as an argument or via PROJECT_NAME environment variable")
+        raise ValueError("project_name must be provided to initialize the logger")
 
     _logger = logging.getLogger()
 
@@ -57,7 +53,7 @@ def _setup_logger(project_name: str = None):
     _initialized = True
 
 
-def get_logger(name, project_name=None):
+def get_logger(name, project_name):
     """
     获取一个命名的日志记录器。第一次调用时会初始化根日志记录器。
 
@@ -70,9 +66,8 @@ def get_logger(name, project_name=None):
 
 
 if __name__ == "__main__":
-    # 测试默认行为
-    get_logger("test_default").info("This is a test message using default project name")
-
     # 测试指定项目名
-    # Note: 根日志只会在初次调用时配置，所以接下来的调用将沿用第一次的配置
-    get_logger("test_project", project_name="custom_app").info("This message will go to the same log file as above")
+    get_logger("test_project", project_name="custom_app").info("This message will go to custom_app_test.log")
+
+    # 再次调用，project_name 虽然也传了，但内部已初始化，不再起作用
+    get_logger("another_logger", project_name="another_app").info("This will still go to the same log file")
